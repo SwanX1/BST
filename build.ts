@@ -1,9 +1,8 @@
-import type { Document } from 'domhandler';
 import { render as serializeHTML } from 'dom-serializer';
 import { minify as minifyHTML } from 'html-minifier';
-import { convertCSSToNonBlocking, convertJSToNonBlocking, getCSSImports, getConfig, getFilesMatching, getFilesRecursively, getHTML, getJSImports, replaceCSSImports, replaceJSImports, transpileCSS, transpileJS } from './src/index';
+import { copyFile, exists, mkdir, unlink } from 'node:fs/promises';
 import path from 'node:path';
-import { unlink, exists, mkdir, copyFile } from 'node:fs/promises';
+import { convertCSSToNonBlocking, getCSSImports, getConfig, getFilesMatching, getFilesRecursively, getHTML, getJSImports, replaceCSSImports, replaceJSImports, transpileCSS, transpileJS } from './src/index';
 
 let currentCompile: string | null = null;
 const errorHandler = (e: any) => {
@@ -64,7 +63,7 @@ for (const htmlPath of htmlFiles) {
   currentCompile = htmlPath;
   if (config.html.reduceBlocking) {
     convertCSSToNonBlocking(html);
-    convertJSToNonBlocking(html);
+    // convertJSToNonBlocking(html);
   }
 
   builtFiles[htmlPath] = serializeHTML(html, { encodeEntities: true });

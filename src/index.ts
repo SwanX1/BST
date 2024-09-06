@@ -151,12 +151,13 @@ export function convertCSSToNonBlocking(document: Document): void {
   }
 }
 
-export function convertJSToNonBlocking(document: Document): void {
-  const elements = getJSElements(document);
-  for (const element of elements) {
-    element.attribs.async = '';
-  }
-}
+// This actually changes functionality, so it's not a good idea
+// export function convertJSToNonBlocking(document: Document): void {
+//   const elements = getJSElements(document);
+//   for (const element of elements) {
+//     element.attribs.async = '';
+//   }
+// }
 
 export function getJSElements(document: Document): Element[] {
   return DomUtils.findAll(

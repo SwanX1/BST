@@ -5,9 +5,13 @@ import { convertCSSToNonBlocking, convertJSToNonBlocking, getCSSImports, getConf
 import path from 'node:path';
 import { unlink, exists, mkdir, copyFile } from 'node:fs/promises';
 
+let currentCompile: string | null = null;
 const errorHandler = (e: any) => {
   if (e instanceof Error) {
-    console.error(e);
+    if (currentCompile) {
+      console.error(`Error while compiling ${currentCompile}`);
+    }
+    console.error(e.message);
   } else {
     console.error(e);
   }
@@ -32,6 +36,7 @@ const builtFiles: Record<string, string> = {};
 // const renamedClasses: Record<string, string> = {};
 
 for (const htmlPath of htmlFiles) {
+  currentCompile = htmlPath;
   const basePath = path.dirname(htmlPath);
   const html = await getHTML(htmlPath).catch(errorHandler);
 
@@ -39,6 +44,7 @@ for (const htmlPath of htmlFiles) {
   const jsImports = getJSImports(html).map(src => importMapper(basePath, src));
 
   for (const cssPath of cssImports) {
+    currentCompile = cssPath;
     const builtPath = cssPath.replace(/\.(s[ac]|c)ss$/, '.css');
     if (!(builtPath in builtFiles)) {
       builtFiles[builtPath] = await transpileCSS(cssPath, { minify: config.css.minify }).catch(errorHandler);
@@ -47,6 +53,7 @@ for (const htmlPath of htmlFiles) {
   }
 
   for (const jsPath of jsImports) {
+    currentCompile = jsPath;
     const builtPath = jsPath.replace(/\.tsx?$/, '.js');
     if (!(builtPath in builtFiles)) {
       builtFiles[builtPath] = await transpileJS(jsPath, { root: config.source, minify: config.css.minify }).catch(errorHandler);
@@ -54,6 +61,7 @@ for (const htmlPath of htmlFiles) {
     replaceJSImports(html, importDemapper(basePath, jsPath), importDemapper(basePath, builtPath));
   }
 
+  currentCompile = htmlPath;
   if (config.html.reduceBlocking) {
     convertCSSToNonBlocking(html);
     convertJSToNonBlocking(html);

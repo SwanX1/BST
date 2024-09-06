@@ -219,13 +219,23 @@ export async function transpileCSS(pathname: string, options: { minify: boolean 
   return (await sassCompiler.compileStringAsync(sass, {
     importer: {
       canonicalize(url, context) {
-        return url.startsWith('~/') ?
-        new URL(url.slice(2), 'file:///node_modules/') :
-        new URL(url, context.containingUrl ?? new URL(pathname, 'file:///'));
+        if (url.includes('/~/')) {
+          url = url.slice(url.indexOf('/~/') + 1);
+        }
+
+        if (url.startsWith('~/')) {
+          return new URL(url.slice(2), 'file:///node_modules/');
+        } else {
+          return new URL(url, context.containingUrl ?? new URL(pathname, 'file:///'));
+        }
       },
       async load(canonicalUrl) {
+        const file = Bun.file(canonicalUrl.pathname.slice(1));
+        if (!await file.exists()) {
+          throw new Error(`${canonicalUrl.pathname} not found`);
+        }
         return {
-          contents: await Bun.file(canonicalUrl.pathname.slice(1)).text(),
+          contents: await file.text(),
           syntax: 'scss',
         };
       },

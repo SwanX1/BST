@@ -6,11 +6,11 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/css": "^0.0.37",
-    "@types/micromatch": "^4.0.9"
+    "@types/html-minifier": "^4.0.5",
+    "@types/micromatch": "^4.0.9",
+    "@types/uglify-js": "^3.17.5"
   },
   "dependencies": {
-    "@types/html-minifier": "^4.0.5",
-    "@types/uglify-js": "^3.17.5",
     "css": "^3.0.0",
     "dom-serializer": "^2.0.0",
     "domhandler": "^5.0.3",

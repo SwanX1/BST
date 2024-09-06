@@ -1,0 +1,26 @@
+{
+  "name": "bst-stack",
+  "module": "src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/css": "^0.0.37",
+    "@types/micromatch": "^4.0.9"
+  },
+  "peerDependencies": {
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@types/html-minifier": "^4.0.5",
+    "@types/uglify-js": "^3.17.5",
+    "css": "^3.0.0",
+    "dom-serializer": "^2.0.0",
+    "domhandler": "^5.0.3",
+    "domutils": "^3.1.0",
+    "html-minifier": "^4.0.0",
+    "htmlparser2": "^9.1.0",
+    "micromatch": "^4.0.8",
+    "sass": "^1.78.0",
+    "uglify-js": "^3.19.3"
+  }
+}

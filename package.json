@@ -1,8 +1,23 @@
 {
   "name": "bst-stack",
   "module": "src/index.ts",
-  "version": "1.0.0",
+  "description": "The BST stack is a front-end helper that uses Sass as the CSS preprocessor, and TSX as the front-end language.",
+  "version": "1.0.1",
+  "license": "MIT",
   "type": "module",
+  "author": {
+    "name": "Kārlis Čerņavskis",
+    "email": "karliscern@gmail.com",
+    "url": "https://cernavskis.dev/"
+  },
+  "bugs": {
+    "email": "karliscern+ghissue@gmail.com",
+    "url": "https://github.com/SwanX1/BST/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SwanX1/BST.git"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/css": "^0.0.37",

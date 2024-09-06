@@ -1,0 +1,6 @@
+example
+node_modules
+.gitignore
+.git
+.npmignore
+README.md

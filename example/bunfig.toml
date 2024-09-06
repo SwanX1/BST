@@ -1,1 +1,1 @@
-preload = ["./node_modules/best-stack/build.ts"]
+preload = ["./node_modules/bst-stack/build.ts"]

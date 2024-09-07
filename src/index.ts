@@ -1,7 +1,8 @@
+import type { BunFile } from 'bun';
 import { Element, type Document } from 'domhandler';
 import { DomUtils, parseDocument } from 'htmlparser2';
 import micromatch from 'micromatch';
-import { readdir, stat } from 'node:fs/promises';
+import { readdir, lstat } from 'node:fs/promises';
 import path from 'node:path';
 import { initAsyncCompiler } from 'sass';
 import ts from 'typescript';
@@ -32,6 +33,24 @@ function uniq<T>(arr: T[]): T[] {
   return Array.from(new Set(arr));
 }
 
+async function isDir(pathname: string): Promise<boolean> {
+  try {
+    return (await lstat(pathname)).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+async function pickFirstExisting(...files: BunFile[]): Promise<BunFile | null> {
+  console.log(files.map(file => file.name));
+  for (const file of files) {
+    if (await file.exists()) {
+      return file;
+    }
+  }
+  return null;
+}
+
 export async function getFilesMatching(pathname: string, glob: string | string[]): Promise<string[]> {
   const files = micromatch.match(await getFilesRecursively(pathname), glob);
   return files.map(file => path.join(pathname, path.relative(pathname, file)));
@@ -43,7 +62,7 @@ export async function getFilesRecursively(dir: string): Promise<string[]> {
   
   for (const entry of entries) {
     const entryPath = path.join(dir, entry);
-    const entryStat = await stat(entryPath);
+    const entryStat = await lstat(entryPath);
     
     if (entryStat.isDirectory()) {
       const subFiles = await getFilesRecursively(entryPath);
@@ -231,9 +250,17 @@ export async function transpileCSS(pathname: string, options: { minify: boolean 
         }
       },
       async load(canonicalUrl) {
-        const file = Bun.file(canonicalUrl.pathname.slice(1));
-        if (!await file.exists()) {
-          throw new Error(`${canonicalUrl.pathname} not found`);
+        const canonPath = canonicalUrl.pathname.slice(1);
+        const file = await pickFirstExisting(
+          Bun.file(canonPath),
+          Bun.file(
+            (await isDir(canonPath)) ?
+              path.join(canonPath, '_index.scss') :
+              path.join(path.dirname(canonPath), '_' + path.basename(canonPath))
+          )
+        );
+        if (file === null) {
+          throw new Error(`${canonPath} not found`);
         }
         return {
           contents: await file.text(),

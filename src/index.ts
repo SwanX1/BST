@@ -42,7 +42,6 @@ async function isDir(pathname: string): Promise<boolean> {
 }
 
 async function pickFirstExisting(...files: BunFile[]): Promise<BunFile | null> {
-  console.log(files.map(file => file.name));
   for (const file of files) {
     if (await file.exists()) {
       return file;
@@ -256,7 +255,7 @@ export async function transpileCSS(pathname: string, options: { minify: boolean 
           Bun.file(
             (await isDir(canonPath)) ?
               path.join(canonPath, '_index.scss') :
-              path.join(path.dirname(canonPath), '_' + path.basename(canonPath))
+              path.join(path.dirname(canonPath), '_' + path.basename(canonPath, '.scss') + '.scss')
           )
         );
         if (file === null) {

@@ -2,7 +2,7 @@
   "name": "bst-stack",
   "module": "src/index.ts",
   "description": "The BST stack is a front-end helper that uses Sass as the CSS preprocessor, and TSX as the front-end language.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "license": "MIT",
   "type": "module",
   "author": {

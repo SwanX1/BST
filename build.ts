@@ -28,6 +28,8 @@ const importDemapper = (base: string, src: string) => {
 
 const config = await getConfig().catch(errorHandler);
 
+const log = config.verbose ? console.log.bind(console.log, "BST:\t") : () => {};
+
 const htmlFiles: string[] = await getFilesMatching(config.source, '**/*.html').catch(errorHandler);
 
 const builtFiles: Record<string, string> = {};
@@ -35,19 +37,25 @@ const builtFiles: Record<string, string> = {};
 // const renamedClasses: Record<string, string> = {};
 
 for (const htmlPath of htmlFiles) {
+  log(`Compiling ${htmlPath}`);
   currentCompile = htmlPath;
   const basePath = path.dirname(htmlPath);
   const html = await getHTML(htmlPath).catch(errorHandler);
 
+  log(`Getting CSS and JS imports from ${htmlPath}`);
   const cssImports = getCSSImports(html).map(src => importMapper(basePath, src));
   const jsImports = getJSImports(html).map(src => importMapper(basePath, src));
 
   for (const cssPath of cssImports) {
+    log(`Compiling ${cssPath}`);
     currentCompile = cssPath;
     const builtPath = cssPath.replace(/\.(s[ac]|c)ss$/, '.css');
     if (!(builtPath in builtFiles)) {
       builtFiles[builtPath] = await transpileCSS(cssPath, { minify: config.css.minify }).catch(errorHandler);
+    } else {
+      log(`Using cached ${builtPath}`);
     }
+    log(`Replacing ${cssPath} with ${builtPath}`);
     replaceCSSImports(html, importDemapper(basePath, cssPath), importDemapper(basePath, builtPath));
   }
 
@@ -56,18 +64,24 @@ for (const htmlPath of htmlFiles) {
     const builtPath = jsPath.replace(/\.tsx?$/, '.js');
     if (!(builtPath in builtFiles)) {
       builtFiles[builtPath] = await transpileJS(jsPath, { root: config.source, minify: config.css.minify }).catch(errorHandler);
+    } else {
+      log(`Using cached ${builtPath}`);
     }
+    log(`Replacing ${jsPath} with ${builtPath}`);
     replaceJSImports(html, importDemapper(basePath, jsPath), importDemapper(basePath, builtPath));
   }
 
   currentCompile = htmlPath;
   if (config.html.reduceBlocking) {
+    log(`Converting blocking CSS to non-blocking`);
     convertCSSToNonBlocking(html);
     // convertJSToNonBlocking(html);
   }
 
+  log(`Serializing ${htmlPath}`);
   builtFiles[htmlPath] = serializeHTML(html, { encodeEntities: true });
   if (config.html.minify) {
+    log(`Minifying ${htmlPath}`);
     builtFiles[htmlPath] = minifyHTML(builtFiles[htmlPath], {
       collapseBooleanAttributes: true,
       collapseInlineTagWhitespace: true,

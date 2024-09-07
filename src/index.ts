@@ -12,6 +12,7 @@ export interface BSTConfig {
   source: string;
   destination: string;
   clean: boolean;
+  verbose: boolean;
   css: {
     minify: boolean;
   };
@@ -31,14 +32,6 @@ export type PartialRecursive<T> = {
 
 function uniq<T>(arr: T[]): T[] {
   return Array.from(new Set(arr));
-}
-
-async function isDir(pathname: string): Promise<boolean> {
-  try {
-    return (await lstat(pathname)).isDirectory();
-  } catch {
-    return false;
-  }
 }
 
 async function pickFirstExisting(...files: BunFile[]): Promise<BunFile | null> {
@@ -90,6 +83,7 @@ export async function getConfig(): Promise<BSTConfig> {
     source: importedConfig.source,
     destination: importedConfig.destination,
     clean: importedConfig.clean ?? false,
+    verbose: importedConfig.verbose ?? false,
     css: {
       minify: importedConfig.css?.minify ?? true,
     },
@@ -250,14 +244,24 @@ export async function transpileCSS(pathname: string, options: { minify: boolean 
       },
       async load(canonicalUrl) {
         const canonPath = canonicalUrl.pathname.slice(1);
-        const file = await pickFirstExisting(
-          Bun.file(canonPath),
-          Bun.file(
-            (await isDir(canonPath)) ?
-              path.join(canonPath, '_index.scss') :
-              path.join(path.dirname(canonPath), '_' + path.basename(canonPath, '.scss') + '.scss')
-          )
-        );
+        const hasExtension = canonPath.lastIndexOf('.') > canonPath.lastIndexOf('/');
+        let candidates: string[] = [];
+
+        candidates.push(canonPath);
+        candidates.push(path.join(canonPath, 'index'));
+        candidates.push(path.join(canonPath, '_index'));
+        candidates.push(path.join(path.dirname(canonPath), '_' + path.basename(canonPath)));
+        candidates.push(path.join(path.dirname(canonPath), path.basename(canonPath)));
+
+        if (!hasExtension) {
+          candidates = candidates.map(candidate => [
+            `${candidate}.scss`,
+            `${candidate}.sass`,
+            `${candidate}.css`,
+          ]).flat();
+        }
+
+        const file = await pickFirstExisting(...uniq(candidates).map(candidate => Bun.file(candidate)));
         if (file === null) {
           throw new Error(`${canonPath} not found`);
         }

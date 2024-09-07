@@ -136,7 +136,7 @@ export function getCSSImports(document: Document): string[] {
 export function replaceCSSImports(document: Document, original: string, replaced: string): void {
   const elements = getCSSElements(document);
   for (const element of elements) {
-    if (element.attribs.href === original) {
+    if (path.normalize(element.attribs.href) === original) {
       element.attribs.href = replaced;
     }
   }
@@ -187,7 +187,7 @@ export function getJSImports(document: Document): string[] {
 export function replaceJSImports(document: Document, original: string, replaced: string): void {
   const elements = getJSElements(document);
   for (const element of elements) {
-    if (element.attribs.src === original) {
+    if (path.normalize(element.attribs.src) === original) {
       element.attribs.src = replaced;
     }
   }

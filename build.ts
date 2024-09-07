@@ -55,7 +55,7 @@ for (const htmlPath of htmlFiles) {
     } else {
       log(`Using cached ${builtPath}`);
     }
-    log(`Replacing ${cssPath} with ${builtPath}`);
+    log(`Replacing ${importDemapper(basePath, cssPath)} with ${importDemapper(basePath, builtPath)}`);
     replaceCSSImports(html, importDemapper(basePath, cssPath), importDemapper(basePath, builtPath));
   }
 
@@ -67,7 +67,7 @@ for (const htmlPath of htmlFiles) {
     } else {
       log(`Using cached ${builtPath}`);
     }
-    log(`Replacing ${jsPath} with ${builtPath}`);
+    log(`Replacing ${importDemapper(basePath, jsPath)} with ${importDemapper(basePath, builtPath)}`);
     replaceJSImports(html, importDemapper(basePath, jsPath), importDemapper(basePath, builtPath));
   }
 
